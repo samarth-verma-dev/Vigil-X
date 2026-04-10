@@ -1,0 +1,77 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+backend/functions/lib/
+vigilx/dist/
+vigilx/web-build/
+*.tsbuildinfo
+
+# Expo
+vigilx/.expo/
+vigilx/.expo-shared/
+vigilx/expo-env.d.ts
+.metro-health-check*
+
+# Firebase
+.firebase/
+**/.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+database-debug.log
+pubsub-debug.log
+storage-debug.log
+*.local
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+!.env.example
+!backend/.env.example
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Kiro
+.kiro/
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.temp
+
+# Documentation (internal/dev only)
+docs/
+*.md
+!README.md
+
+# Development/testing scripts
+create-test-user.js
+test-scan.js
+qr-viewer.js
+
+# Internal notes
+FIXES_APPLIED.md
+API_CONTRACT.md
+AUTH_SETUP_GUIDE.md
+
+# Git submodules (SAUVigilX has its own repo)
+SAUVigilX/

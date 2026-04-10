@@ -1,0 +1,81 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() { return request.auth != null; }
+    function isOwner(uid) { return isAuthenticated() && request.auth.uid == uid; }
+    function hasRole(role) { return isAuthenticated() && request.auth.token.role == role; }
+    function isAdmin() { return hasRole('admin'); }
+    function isGuard() { return hasRole('guard'); }
+    function isAdminOrGuard() { return isAdmin() || isGuard(); }
+
+    // Users: read own, admin/guard read all, admin write
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin() || isGuard();
+      allow create, update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Auth state: read own, admin SDK only write
+    match /auth_state/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow write: if false;
+    }
+
+    // Gates: all authenticated read, admin write
+    match /gates/{gateId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Logs: admin/guard read, admin SDK only write
+    match /logs/{logId} {
+      allow read: if isAdminOrGuard();
+      allow write: if false;
+    }
+
+    // Parcels: all authenticated read, admin/guard create/update, admin delete
+    match /parcels/{parcelId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdminOrGuard();
+      allow update: if isAdminOrGuard();
+      allow delete: if isAdmin();
+    }
+
+    // Visitor sessions: all authenticated read, admin/guard create/update, admin delete
+    match /visitor_sessions/{visitorId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdminOrGuard();
+      allow update: if isAdminOrGuard();
+      allow delete: if isAdmin();
+    }
+
+    // Pending scans: guard/admin read, admin SDK only write
+    match /pending_scans/{scanId} {
+      allow read: if isGuard() || isAdmin();
+      allow write: if false;
+    }
+
+    // Face embeddings: read/create own, admin read/update/delete all
+    match /face_embeddings/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid);
+      allow update, delete: if isAdmin();
+    }
+
+    // Night out requests: read/create own, admin/guard read/update all
+    match /night_out_requests/{requestId} {
+      allow read: if isAuthenticated() && (resource.data.uid == request.auth.uid || isAdminOrGuard());
+      allow create: if isAuthenticated() && request.resource.data.uid == request.auth.uid;
+      allow update: if isAdminOrGuard();
+    }
+
+    // Emergency logs: read/create own, admin/guard read/update all
+    match /emergency_logs/{logId} {
+      allow read: if isAuthenticated() && (resource.data.uid == request.auth.uid || isAdminOrGuard());
+      allow create: if isAuthenticated() && request.resource.data.uid == request.auth.uid;
+      allow update: if isAdminOrGuard();
+    }
+  }
+}

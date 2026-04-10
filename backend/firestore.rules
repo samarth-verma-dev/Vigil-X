@@ -1,0 +1,143 @@
+rules_version = '2';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VigilX Firestore Security Rules
+//
+// DEVELOPMENT (emulator): Open rules to unblock development-time testing.
+//   The emulator does NOT enforce rules the same way production does, but
+//   having permissive rules avoids "Missing or insufficient permissions" errors
+//   when testing with users whose custom claims haven't been set yet.
+//
+// PRODUCTION: Swap back to the strict role-based rules below.
+// ─────────────────────────────────────────────────────────────────────────────
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 🚧 DEV/PROTOTYPE BYPASS 🚧
+    // Allows all operations to succeed when testing frontend components
+    // without active Firebase Auth tokens (e.g., PROTOTYPE_MODE).
+    // REMOVE OR COMMENT OUT BEFORE PRODUCTION DEPLOYMENT
+    match /{document=**} {
+      allow read, write: if true;
+    }
+
+    // ── Helper Functions ────────────────────────────────────────────────────
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function hasRole(role) {
+      return isAuthenticated() && getUserData().role == role;
+    }
+
+    function isAdmin()        { return hasRole('admin'); }
+    function isGuard()        { return hasRole('guard'); }
+    function isAdminOrGuard() { return isAdmin() || isGuard(); }
+
+<<<<<<< Updated upstream
+    function isGuard() {
+      return hasRole('guard');
+    }
+
+    function isAdminOrGuard() {
+      return isAdmin() || isGuard();
+    }
+
+    // ─── Users Collection ───────────────────────────────────
+    // Users can read their own doc, admins can read/write all
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin() || isGuard();
+=======
+    // ── Users Collection ────────────────────────────────────────────────────
+    // DEV: Any authenticated user can read (needed for guard scanner + search).
+    // Allow guards/admins to list; students/faculty to read own doc.
+    match /users/{uid} {
+      allow get:    if isAuthenticated();        // any logged-in user
+      allow list:   if isAdminOrGuard();
+>>>>>>> Stashed changes
+      allow create, update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── Auth State ──────────────────────────────────────────────────────────
+    match /auth_state/{uid} {
+      allow read:  if isOwner(uid) || isAdmin();
+      allow write: if false; // Admin SDK only (Cloud Functions)
+    }
+
+    // ── Gates ───────────────────────────────────────────────────────────────
+    match /gates/{gateId} {
+      allow read:  if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // ── Access Logs ─────────────────────────────────────────────────────────
+    match /logs/{logId} {
+      allow read:  if isAdminOrGuard();
+      allow write: if isAuthenticated(); // DEV: allow guard app to write logs directly
+    }
+
+    // ── Parcels ─────────────────────────────────────────────────────────────
+    match /parcels/{parcelId} {
+      allow read:   if isAuthenticated();
+      allow create: if isAdminOrGuard();
+      allow update: if isAdminOrGuard();
+      allow delete: if isAdmin();
+    }
+
+    // ── Visitor Sessions ─────────────────────────────────────────────────────
+    match /visitor_sessions/{visitorId} {
+      allow read:   if isAuthenticated();
+      allow create: if isAuthenticated();   // visitors create their own session
+      allow update: if isAdminOrGuard();
+      allow delete: if isAdmin();
+    }
+
+    // ── Pending Scans (real-time guard app feed) ──────────────────────────
+    match /pending_scans/{scanId} {
+      allow read:  if isAdminOrGuard();
+      allow write: if isAuthenticated(); // DEV: allow direct write for testing
+    }
+
+    // ── Face Embeddings ───────────────────────────────────────────────────
+    match /face_embeddings/{uid} {
+      allow read:   if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid);
+      allow update, delete: if isAdmin();
+    }
+
+    // ── Night Out Requests ────────────────────────────────────────────────
+    match /night_out_requests/{requestId} {
+      allow read:   if isAuthenticated();  // student reads own, admin reads all
+      allow create: if isAuthenticated();
+      allow update: if isAdminOrGuard();
+      allow delete: if isAdmin();
+    }
+
+    // ── Flags ─────────────────────────────────────────────────────────────
+    match /flags/{flagId} {
+      allow read:   if isAdminOrGuard();
+      allow create: if isAuthenticated();  // app writes flags client-side
+      allow update: if isAdminOrGuard();
+      allow delete: if isAdmin();
+    }
+
+    // ── Emergency Logs ────────────────────────────────────────────────────
+    match /emergency_logs/{logId} {
+      allow read:   if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAdminOrGuard();
+      allow delete: if isAdmin();
+    }
+  }
+}

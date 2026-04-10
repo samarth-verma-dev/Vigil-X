@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+
+# Expo
+.expo/
+.expo-shared/
+dist/
+expo-env.d.ts
+web-build/
+
+# Metro
+.metro-health-check*
+
+# Build outputs
+*.tsbuildinfo
+backend/functions/lib/
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+database-debug.log
+pubsub-debug.log
+storage-debug.log
+*.local
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
