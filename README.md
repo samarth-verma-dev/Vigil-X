@@ -351,16 +351,9 @@ See [docs/API.md](docs/API.md) for detailed API documentation.
 
 ## 📄 License
 
-[Your License Here]
+[MIT License]
 
 ## 👨‍💻 Authors
 
-[Your Team/Organization]
+[Team-Logical Error]
 
-## 🐛 Issues
-
-Report issues at [Your Issue Tracker]
-
-## 📞 Support
-
-For support, email [your-email] or join our Slack channel.
