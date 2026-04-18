@@ -1,4 +1,4 @@
-# SAU-Vigil: Smart Campus Access Control System
+# Vigil-X: Smart Campus Access Control System
 
 A Firebase-based access control system for campus security featuring QR code scanning, face-based device binding, role-based authentication, and gate-specific access policies.
 
